@@ -9,7 +9,7 @@ module.exports = function (req, res, next) {
         sourceCode=sourceCode.replace(/ { |{ | {/g,'{')
         sourceCode=sourceCode.replace(/ } |} | }/g,'}')
         sourceCode=sourceCode.replace(/ : |: | "/g,':')
-        req.body.inputText=sourceCode
+        req.body.inputText=sourceCode.trim()
         next()
     } catch (err) {
         console.error(err)
