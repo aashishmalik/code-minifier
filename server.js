@@ -18,14 +18,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))
 })
 
-app.post('/download', (req, res) => {
+app.get('/download', (req, res) => {
     var filePath = "./public/minihtml"; 
     child_process.execSync(`zip -r archive *`, {
         cwd: filePath
       });
     res.download(filePath+'/archive.zip');
 })
-
 
 app.post('/minify', [minifyJs,minifyCss,minifyHtml], (req, res) => {
     try {

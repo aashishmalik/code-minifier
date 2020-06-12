@@ -1,1 +1,0 @@
-let editors = ['VsCode', 'Eclipse', 'Atom', 'Sublime']
