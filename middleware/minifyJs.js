@@ -5,7 +5,7 @@ const Terser = require("terser")
 
 module.exports = async function (req, res, next) {
     try {
-        console.log('js middleware')
+
         const html = await axios.get(`${req.body.inputText}`)
         const $ = await cheerio.load(html.data);
         const jsLinks = []
@@ -33,17 +33,21 @@ module.exports = async function (req, res, next) {
                 });
                 await Promise.all(promises);
                 let options = {
-                    toplevel: true, warnings: true, mangle: {
+                    comments: false,
+                    toplevel: true,
+                    warnings: true,
+                    mangle: {
                         properties: true,
                     }
+                    
                 }
                 let result = Terser.minify(code, options);
-                fs.writeFile('./public/minihtml/js_terser.js', result.code, (err) => {
+                fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
                     if (err) {
                         console.error(err)
                         return res.status(500).json({ msg: "fs error" })
                     }
-                    $('<script>').attr({ src: '/js_terser.js', type: 'text/javascript' }).appendTo('body')
+                    $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
                     res.locals.html = $.html();
                     next()
                 });
@@ -52,7 +56,7 @@ module.exports = async function (req, res, next) {
             }
         }
         performJSminification()
-        
+
     } catch (err) {
         console.error(err)
     }

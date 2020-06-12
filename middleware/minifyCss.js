@@ -34,23 +34,23 @@ module.exports = async function (req, res, next) {
                 });
                 await Promise.all(promisesCss);
 
-                let options = { level: 1 };
+                let options = { level: { 1: { specialComments: false} } };
                 let result = new CleanCSS(options).minify(code);
 
-                fs.writeFile('./public/minihtml/css_clean.css', result.styles, (err) => {
+                fs.writeFile('./public/minihtml/style.min.css', result.styles, (err) => {
                     if (err) {
                         console.error(err)
                         return res.status(500).json({ msg: "fs error" })
                     }
                 });
-                res.locals.html=$.html()
+                res.locals.html = $.html()
                 next()
             } catch (err) {
                 console.log(err);
             }
         }
         performCSSminification()
-        $('<link/>').attr({ rel: 'stylesheet', type: 'text/css', href: 'css_clean.css' }).appendTo('head');
+        $('<link/>').attr({ rel: 'stylesheet', type: 'text/css', href: 'style.min.css' }).appendTo('head');
     } catch (err) {
         console.error(err)
     }

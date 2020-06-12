@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))
 })
 
-app.post('/download', [minifyJs,minifyCss,minifyHtml], (req, res) => {
+app.post('/download', (req, res) => {
     var filePath = "./public/minihtml"; 
     child_process.execSync(`zip -r archive *`, {
         cwd: filePath
