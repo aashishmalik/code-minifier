@@ -1,6 +1,8 @@
 const express = require('express')
 const logger = require('morgan')
-const minify = require('./middleware/minify')
+const minifyJs = require('./middleware/minifyJs')
+const minifyCss = require('./middleware/minifyCss')
+const minifyHtml = require('./middleware/minifyHtml')
 const path = require('path')
 var bodyParser = require('body-parser');
 const child_process = require('child_process');
@@ -16,16 +18,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))
 })
 
-app.post('/download', minify, (req, res) => {
+app.post('/download', [minifyJs,minifyCss,minifyHtml], (req, res) => {
     var filePath = "./public/minihtml"; 
-    child_process.execSync(`zip -r html_minified *`, {
+    child_process.execSync(`zip -r archive *`, {
         cwd: filePath
       });
     res.download(filePath+'/archive.zip');
 })
 
 
-app.post('/render', minify, (req, res) => {
+app.post('/render', [minifyJs,minifyCss,minifyHtml], (req, res) => {
     try {
         res.sendFile(path.join(__dirname, '/public/minihtml/test.html'))
     } catch (err) {
