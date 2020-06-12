@@ -33,13 +33,10 @@ module.exports = async function (req, res, next) {
                 });
                 await Promise.all(promises);
                 let options = {
-                    comments: false,
-                    toplevel: true,
-                    warnings: true,
-                    mangle: {
+                    output: {comments: false},
+                    toplevel: true, warnings: true, mangle: {
                         properties: true,
                     }
-                    
                 }
                 let result = Terser.minify(code, options);
                 fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
@@ -56,7 +53,7 @@ module.exports = async function (req, res, next) {
             }
         }
         performJSminification()
-
+        
     } catch (err) {
         console.error(err)
     }

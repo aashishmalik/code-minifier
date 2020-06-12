@@ -27,9 +27,9 @@ app.post('/download', (req, res) => {
 })
 
 
-app.post('/render', [minifyJs,minifyCss,minifyHtml], (req, res) => {
+app.post('/minify', [minifyJs,minifyCss,minifyHtml], (req, res) => {
     try {
-        res.sendFile(path.join(__dirname, '/public/minihtml/test.html'))
+        res.redirect('/download')
     } catch (err) {
         return res.status(500).json({ msg: "file not found" })
     }

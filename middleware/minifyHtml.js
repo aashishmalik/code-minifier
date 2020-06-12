@@ -13,7 +13,7 @@ module.exports = async function (req, res, next) {
                     removeAttributeQuotes: true,
                     collapseWhitespace: true
                 });
-                fs.writeFile('./public/minihtml/test.html', result, (err) => {
+                fs.writeFile('./public/minihtml/index.html', result, (err) => {
                     if (err) {
                         console.error(err)
                         return res.status(500).json({ msg: "fs error" })
