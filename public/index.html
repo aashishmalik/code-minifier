@@ -8,13 +8,14 @@
         body {
             background-color: rgba(177, 202, 214, 0.829);
             font-size: large;
+            text-align: left;
         }
 
         .inpbtn {
-            margin-left: 50px;
-            margin-top: 80px;
-            width: 200px;
-            height: 80px;
+            margin-left: 5px;
+            margin-top: 8px;
+            width: 150px;
+            height: 60px;
             font-size: 20px;
             cursor: pointer;
             background-color: #4CAF50;
@@ -31,23 +32,14 @@
     </div>
 
     <p style="text-align: center;">Get your Minified HTML Page</p>
-
-
     <form method="POST">
-        <div style="display: flex;">
-            <textarea name="inputText" id="txt" cols="100" rows="28" placeholder="Enter HTML Here...."></textarea>
-            <div style="display:flex; flex-direction: column;">
-                <input class="inpbtn" formaction="/minified" type="submit" value="Minify" />
-                <input class="inpbtn" formaction="/render" type="submit" value="Render" />
-            </div>
-        </div>
+        <label> Enter an https:// URL:</label>
+        <input type="url" id="inputText" name="inputText" style="margin: 2px; width: 1346px; height: 300px;" required>
+        <input class="inpbtn" formaction="/download" type="submit" value="Download" />
+        <input class="inpbtn" formaction="/render" type="submit" value="Render" />
     </form>
-    <script>
-        let languages = ['Java', 'JavaScript', 'CSS', 'NodeJs']
-    </script>
-    <script>
-        let editors = ['VsCode', 'Eclipse', 'Atom', 'Sublime']
-    </script>
+    <script src="/script.js"></script>
+    <script src="/script2.js"></script>
 </body>
 
 </html>
