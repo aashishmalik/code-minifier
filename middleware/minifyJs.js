@@ -1,14 +1,15 @@
 const axios = require('axios')
 const fs = require('fs')
+const URL = require('url')
 const cheerio = require('cheerio')
 const Terser = require("terser")
 
 module.exports = async function (req, res, next) {
     try {
-
         const html = await axios.get(`${req.body.inputText}`)
-        const $ = await cheerio.load(html.data);
-        const jsLinks = []
+        const $ = await cheerio.load(html.data)
+        const baseURL = URL.parse(req.body.inputText).protocol + '//' + URL.parse(req.body.inputText).host
+        let jsLinks = []
         // get all scripts links
         $('script').each((i, el) => {
             if ($(el).attr('data-src'))
@@ -17,6 +18,13 @@ module.exports = async function (req, res, next) {
                 jsLinks.push($(el).attr('src'))
             $(el).remove();
         })
+        
+
+        // handling relative Links
+        jsLinks = jsLinks.map(x => {
+            return URL.resolve(baseURL, x)
+        })
+
         async function performJSminification() {
             try {
 
@@ -33,18 +41,24 @@ module.exports = async function (req, res, next) {
                 });
                 await Promise.all(promises);
                 let options = {
-                    output: {comments: false},
+                    output: { comments: false },
                     toplevel: true, warnings: true, mangle: {
                         properties: true,
                     }
                 }
+
+                //minify
                 let result = Terser.minify(code, options);
+
+                //writing to file
                 fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
                     if (err) {
                         console.error(err)
                         return res.status(500).json({ msg: "fs error" })
                     }
                     $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
+                    
+                    // passing to next middleware
                     res.locals.html = $.html();
                     next()
                 });
@@ -53,7 +67,6 @@ module.exports = async function (req, res, next) {
             }
         }
         performJSminification()
-        
     } catch (err) {
         console.error(err)
     }

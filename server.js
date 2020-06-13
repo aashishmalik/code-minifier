@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 const child_process = require('child_process');
 const app = express()
 //
+app.enable('trust proxy');
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static(path.join(__dirname, 'public')))
@@ -26,9 +27,10 @@ app.get('/download', (req, res) => {
     res.download(filePath+'/archive.zip');
 })
 
-app.post('/minify', [minifyJs,minifyCss,minifyHtml], (req, res) => {
+app.post('/minify', [minifyJs], (req, res) => {
     try {
-        res.redirect('/download')
+        // res.redirect('/download')
+        res.send('done')
     } catch (err) {
         return res.status(500).json({ msg: "file not found" })
     }
