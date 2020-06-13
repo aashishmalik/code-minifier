@@ -9,7 +9,6 @@ module.exports = async function (req, res, next) {
         const html = await axios.get(`${req.body.inputText}`)
         const $ = await cheerio.load(html.data)
         const baseURL = URL.parse(req.body.inputText).protocol + '//' + URL.parse(req.body.inputText).host
-
         let jsLinks = []
         // get all scripts links
         $('script').each((i, el) => {
@@ -57,7 +56,7 @@ module.exports = async function (req, res, next) {
                 fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
                     if (err) {
                         console.error(err)
-                        return res.status(500).json({ msg: "fs error" })
+                        return res.status(500).json({ msg: "error creating javascript file" })
                     }
                     $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
 

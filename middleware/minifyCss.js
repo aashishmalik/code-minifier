@@ -6,7 +6,6 @@ const cleanCSS = require('clean-css')
 
 module.exports = async function (req, res, next) {
     try {
-        console.log('css middleware')
         const $ = await cheerio.load(res.locals.html);
         let cssLinks = []
         // get all css links
@@ -43,7 +42,7 @@ module.exports = async function (req, res, next) {
                 fs.writeFile('./public/minihtml/style.min.css', result.styles, (err) => {
                     if (err) {
                         console.error(err)
-                        return res.status(500).json({ msg: "fs error" })
+                        return res.status(500).json({ msg: "error creating css file"})
                     }
                     res.locals.html = $.html()
                     next()

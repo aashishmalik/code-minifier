@@ -1,25 +1,27 @@
 const axios = require('axios')
 const fs = require('fs')
 const cheerio = require('cheerio')
-const TerserHtml = require('html-minifier-terser').minify
+const terserHtml = require('html-minifier-terser').minify
 
 module.exports = async function (req, res, next) {
     try {
-        console.log('html middleware')
         const $ = await cheerio.load(res.locals.html);
         async function performHTMLminification() {
             try {
-                let result = TerserHtml($.html(), {
+                let result = terserHtml($.html(), {
                     removeAttributeQuotes: true,
                     collapseWhitespace: true,
                     conservativeCollapse:1,
                     minifyCSS:true,
-                    minifyJS:true
+                    minifyJS:true,
+                    removeComments: true,
+                    removeCommentsFromCDATA: true,
                 });
+                // writing to file
                 fs.writeFile('./public/minihtml/index.html', result, (err) => {
                     if (err) {
                         console.error(err)
-                        return res.status(500).json({ msg: "fs error" })
+                        return res.status(500).json({ msg: "error creating html file" })
                     }
                     next()
                 })
