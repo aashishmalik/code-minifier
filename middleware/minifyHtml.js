@@ -9,7 +9,6 @@ module.exports = async function (req, res, next) {
         async function performHTMLminification() {
             try {
                 let result = terserHtml($.html(), {
-                    removeAttributeQuotes: true,
                     collapseWhitespace: true,
                     conservativeCollapse:1,
                     minifyCSS:true,

@@ -12,11 +12,11 @@ module.exports = async function (req, res, next) {
         let jsLinks = []
         // get all scripts links
         $('script').each((i, el) => {
-            if ($(el).attr('data-src')){
+            if ($(el).attr('data-src')) {
                 jsLinks.push($(el).attr('data-src'))
                 $(el).remove();
             }
-            if ($(el).attr('src')){
+            if ($(el).attr('src')) {
                 jsLinks.push($(el).attr('src'))
                 $(el).remove();
             }
@@ -38,33 +38,43 @@ module.exports = async function (req, res, next) {
                             code[`file${i++}.js`] = response.data
                         })
                         .catch(err => {
+                            console.log('url not correct')
                             console.error(err)
                         })
                 });
                 await Promise.all(promises);
-                let options = {
-                    output: { comments: false },
-                    toplevel: true, warnings: true, mangle: {
-                        properties: true,
-                    }
-                }
-
-                //minify
-                let result = terser.minify(code, options);
-
-                //writing to file
-                fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
-                    if (err) {
-                        console.error(err)
-                        return res.status(500).json({ msg: "error creating javascript file" })
-                    }
-                    $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
-
-                    // passing to next middleware
+                if (Object.keys(code).length == 0) {
                     res.locals.html = $.html();
                     res.locals.basehost = baseURL
                     next()
-                });
+                } else {
+                    let options = {
+                        output: { comments: false },
+                        toplevel: true,
+                        warnings: true,
+                        mangle: {
+                            properties: true,
+                        }
+                    }
+
+                    //minify
+
+                    let result = terser.minify(code, options);
+
+                    //writing to file
+                    fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
+                        if (err) {
+                            console.error(err)
+                            return res.status(500).json({ msg: "error creating javascript file" })
+                        }
+                        $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
+
+                        // passing to next middleware
+                        res.locals.html = $.html();
+                        res.locals.basehost = baseURL
+                        next()
+                    });
+                }
             } catch (err) {
                 console.log(err);
             }

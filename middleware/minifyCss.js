@@ -20,11 +20,11 @@ module.exports = async function (req, res, next) {
         // handling relative urls
         cssLinks = cssLinks.map(url => {
             return URL.resolve(res.locals.basehost, url)
-        })  
+        })
 
         async function performCSSminification() {
             try {
-                let code = {}
+                let code = ''
                 const promisesCss = cssLinks.map(url => {
                     return axios.get(url)
                         .then(response => {
@@ -35,24 +35,31 @@ module.exports = async function (req, res, next) {
                         })
                 });
                 await Promise.all(promisesCss);
-
-                let options = { level: { 1: { specialComments: false} } };
-                let result = new cleanCSS(options).minify(code);
-
-                fs.writeFile('./public/minihtml/style.min.css', result.styles, (err) => {
-                    if (err) {
-                        console.error(err)
-                        return res.status(500).json({ msg: "error creating css file"})
-                    }
+                if (code.length == 0) {
                     res.locals.html = $.html()
                     next()
-                });
+                } else {
+
+                    let options = { level: { 1: { specialComments: false } } };
+                    let result = new cleanCSS(options).minify(code);
+
+                    fs.writeFile('./public/minihtml/style.min.css', result.styles, (err) => {
+                        if (err) {
+                            console.error(err)
+                            return res.status(500).json({ msg: "error creating css file" })
+                        }
+                        $('<link/>').attr({ rel: 'stylesheet', type: 'text/css', href: 'style.min.css' }).appendTo('head');
+                        // passing to next middleware
+                        res.locals.html = $.html()
+                        next()
+                    });
+                }
             } catch (err) {
                 console.log(err);
             }
         }
         performCSSminification()
-        $('<link/>').attr({ rel: 'stylesheet', type: 'text/css', href: 'style.min.css' }).appendTo('head');
+       
     } catch (err) {
         console.error(err)
     }
