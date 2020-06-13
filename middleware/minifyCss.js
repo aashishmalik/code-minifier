@@ -1,13 +1,14 @@
 const axios = require('axios')
 const fs = require('fs')
 const cheerio = require('cheerio')
-const CleanCSS = require('clean-css')
+const URL = require('url')
+const cleanCSS = require('clean-css')
 
 module.exports = async function (req, res, next) {
     try {
         console.log('css middleware')
         const $ = await cheerio.load(res.locals.html);
-        const cssLinks = []
+        let cssLinks = []
         // get all css links
         $('link[rel="stylesheet"]').each((i, el) => {
             if ($(el).attr('href'))
@@ -17,12 +18,14 @@ module.exports = async function (req, res, next) {
             $(el).remove();
         })
 
+        // handling relative urls
+        cssLinks = cssLinks.map(url => {
+            return URL.resolve(res.locals.basehost, url)
+        })  
+
         async function performCSSminification() {
             try {
-
-
                 let code = {}
-
                 const promisesCss = cssLinks.map(url => {
                     return axios.get(url)
                         .then(response => {
@@ -35,16 +38,16 @@ module.exports = async function (req, res, next) {
                 await Promise.all(promisesCss);
 
                 let options = { level: { 1: { specialComments: false} } };
-                let result = new CleanCSS(options).minify(code);
+                let result = new cleanCSS(options).minify(code);
 
                 fs.writeFile('./public/minihtml/style.min.css', result.styles, (err) => {
                     if (err) {
                         console.error(err)
                         return res.status(500).json({ msg: "fs error" })
                     }
+                    res.locals.html = $.html()
+                    next()
                 });
-                res.locals.html = $.html()
-                next()
             } catch (err) {
                 console.log(err);
             }

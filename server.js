@@ -4,11 +4,11 @@ const minifyJs = require('./middleware/minifyJs')
 const minifyCss = require('./middleware/minifyCss')
 const minifyHtml = require('./middleware/minifyHtml')
 const path = require('path')
+const fs = require('fs')
 var bodyParser = require('body-parser');
 const child_process = require('child_process');
 const app = express()
-//
-app.enable('trust proxy');
+
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static(path.join(__dirname, 'public')))
@@ -20,19 +20,18 @@ app.get('/', (req, res) => {
 })
 
 app.get('/download', (req, res) => {
-    var filePath = "./public/minihtml"; 
+    var filePath = "./public/minihtml";
     child_process.execSync(`zip -r archive *`, {
         cwd: filePath
-      });
-    res.download(filePath+'/archive.zip');
+    });
+    res.download(filePath + '/archive.zip');
 })
 
-app.post('/minify', [minifyJs], (req, res) => {
+app.post('/minify', [minifyJs, minifyCss, minifyHtml], (req, res) => {
     try {
-        // res.redirect('/download')
-        res.send('done')
+        res.redirect('/download')
     } catch (err) {
-        return res.status(500).json({ msg: "file not found" })
+        return res.status(500).json({ msg: "Error during Minification" })
     }
 })
 

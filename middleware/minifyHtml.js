@@ -11,15 +11,18 @@ module.exports = async function (req, res, next) {
             try {
                 let result = TerserHtml($.html(), {
                     removeAttributeQuotes: true,
-                    collapseWhitespace: true
+                    collapseWhitespace: true,
+                    conservativeCollapse:1,
+                    minifyCSS:true,
+                    minifyJS:true
                 });
                 fs.writeFile('./public/minihtml/index.html', result, (err) => {
                     if (err) {
                         console.error(err)
                         return res.status(500).json({ msg: "fs error" })
                     }
+                    next()
                 })
-                next()
             } catch (err) {
                 console.log(err);
             }

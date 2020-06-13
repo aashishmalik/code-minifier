@@ -2,23 +2,26 @@ const axios = require('axios')
 const fs = require('fs')
 const URL = require('url')
 const cheerio = require('cheerio')
-const Terser = require("terser")
+const terser = require("terser")
 
 module.exports = async function (req, res, next) {
     try {
         const html = await axios.get(`${req.body.inputText}`)
         const $ = await cheerio.load(html.data)
         const baseURL = URL.parse(req.body.inputText).protocol + '//' + URL.parse(req.body.inputText).host
+
         let jsLinks = []
         // get all scripts links
         $('script').each((i, el) => {
-            if ($(el).attr('data-src'))
+            if ($(el).attr('data-src')){
                 jsLinks.push($(el).attr('data-src'))
-            if ($(el).attr('src'))
+                $(el).remove();
+            }
+            if ($(el).attr('src')){
                 jsLinks.push($(el).attr('src'))
-            $(el).remove();
+                $(el).remove();
+            }
         })
-        
 
         // handling relative Links
         jsLinks = jsLinks.map(x => {
@@ -48,7 +51,7 @@ module.exports = async function (req, res, next) {
                 }
 
                 //minify
-                let result = Terser.minify(code, options);
+                let result = terser.minify(code, options);
 
                 //writing to file
                 fs.writeFile('./public/minihtml/script.min.js', result.code, (err) => {
@@ -57,9 +60,10 @@ module.exports = async function (req, res, next) {
                         return res.status(500).json({ msg: "fs error" })
                     }
                     $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
-                    
+
                     // passing to next middleware
                     res.locals.html = $.html();
+                    res.locals.basehost = baseURL
                     next()
                 });
             } catch (err) {
