@@ -10,16 +10,18 @@ module.exports = async function (req, res, next) {
         const $ = await cheerio.load(html.data)
         const baseURL = URL.parse(req.body.inputText).protocol + '//' + URL.parse(req.body.inputText).host
         let jsLinks = []
+        let code = {}
+        let i = 1
         // get all scripts links
         $('script').each((i, el) => {
             if ($(el).attr('data-src')) {
                 jsLinks.push($(el).attr('data-src'))
-                $(el).remove();
-            }
-            if ($(el).attr('src')) {
+            } else if ($(el).attr('src')) {
                 jsLinks.push($(el).attr('src'))
-                $(el).remove();
+            } else {
+                code[`file${i++}.js`] = $(el).html()
             }
+            $(el).remove()
         })
 
         // handling relative Links
@@ -30,8 +32,7 @@ module.exports = async function (req, res, next) {
         async function performJSminification() {
             try {
 
-                let code = {}
-                let i = 1
+
                 const promises = jsLinks.map(url => {
                     return axios.get(url)
                         .then(response => {
@@ -67,7 +68,7 @@ module.exports = async function (req, res, next) {
                             console.error(err)
                             return res.status(500).json({ msg: "error creating javascript file" })
                         }
-                        $('<script>').attr({ src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
+                        $('<script>').attr({ defer: 'defer', src: 'script.min.js', type: 'text/javascript' }).appendTo('body')
 
                         // passing to next middleware
                         res.locals.html = $.html();

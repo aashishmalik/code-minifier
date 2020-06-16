@@ -5,8 +5,10 @@ const minifyCss = require('./middleware/minifyCss')
 const minifyHtml = require('./middleware/minifyHtml')
 const path = require('path')
 const fs = require('fs')
+const admZip = require('adm-zip');
+const zip = new admZip();
 var bodyParser = require('body-parser');
-const child_process = require('child_process');
+// const child_process = require('child_process');
 const app = express()
 
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -20,11 +22,24 @@ app.get('/', (req, res) => {
 })
 
 app.get('/download', (req, res) => {
-    var filePath = "./public/minihtml";
-    child_process.execSync(`zip -r archive *`, {
-        cwd: filePath
-    });
-    res.download(filePath + '/archive.zip');
+
+    let uploadDir = fs.readdirSync(__dirname+"/public/minihtml")
+ 
+    for(let i = 0; i < uploadDir.length;i++){
+        zip.addLocalFile(__dirname+"/public/minihtml/"+uploadDir[i])
+    }
+    
+    // Define zip file name
+    const downloadName = "archive.zip"
+    const data = zip.toBuffer()
+    // save file zip in root directory
+    zip.writeZip(__dirname+"/"+downloadName);
+    
+    // code to download zip file
+    res.set('Content-Type','application/octet-stream')
+    res.set('Content-Disposition',`attachment; filename=${downloadName}`)
+    res.set('Content-Length',data.length)
+    res.download(__dirname+"/"+downloadName);
 })
 
 app.post('/minify', [minifyJs, minifyCss, minifyHtml], (req, res) => {
