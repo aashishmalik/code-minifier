@@ -1,13 +1,12 @@
 const express = require('express')
 const logger = require('morgan')
-const minifyJs = require('./middleware/minifyJs')
-const minifyCss = require('./middleware/minifyCss')
-const minifyHtml = require('./middleware/minifyHtml')
 const path = require('path')
 const fs = require('fs')
 const admZip = require('adm-zip');
-var bodyParser = require('body-parser');
-// const child_process = require('child_process');
+const bodyParser = require('body-parser')
+const minifyJs = require('./middleware/minifyJs')
+const minifyCss = require('./middleware/minifyCss')
+const minifyHtml = require('./middleware/minifyHtml')
 const app = express()
 
 app.use(bodyParser.json({ limit: "50mb" }));
